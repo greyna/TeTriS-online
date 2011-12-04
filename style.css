@@ -1,0 +1,61 @@
+﻿html { background-color:gray; }
+body
+{
+	background-color:black;
+	color:white;
+	width: 70%;
+	margin:auto;
+	margin-top: 1%;
+	padding: 1%;
+	padding-top: 0%;
+	padding-bottom: 0%;
+	border: white solid 1px;
+	border-radius: 15px;
+	height:80%
+}
+a { color:white; }
+a:hover { color:white; }
+a:focus { color:white; }
+a:visited { color:white; }
+a:active { color:white; }
+
+nav li
+{
+	display: inline;
+	margin: 0%;
+	padding-top: 0.5%;
+	padding-bottom: 0.5%;
+	padding-left: 2%;
+	padding-right: 2%;
+	background-color: dimgray;
+	border-radius: 8px;
+}
+nav li:hover
+{
+	background-color:gray;
+}
+
+header h1
+{
+	text-align: center;
+}
+header h2
+{
+	float: right;
+}
+
+footer
+{
+	margin-top:1%;
+	text-align: center;
+}
+
+section aside
+{
+	
+}
+article
+{
+	text-align: center;
+}
+canvas { border: 1px solid white; }

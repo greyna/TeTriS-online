@@ -27,7 +27,7 @@ function Map() { // Map des pièces déposées sous forme matricielle (1 si cube
 				articlep.innerHTML+=him.matrice[i][j];
 		}
 	};
-	this.collision = function(piece) { // retourne vrai si une collision arrivera au prochain appel de moveToBot
+	this.collisionVerticale = function(piece) { // retourne vrai si une collision verticale arrivera au prochain appel de moveToBot
 		var x = (piece.xp/20)|0; // cast from double to integer
 		var y = (piece.yp/20)|0;
 		for (var i=y; i < y+4; i++)
@@ -37,7 +37,19 @@ function Map() { // Map des pièces déposées sous forme matricielle (1 si cube
 						return true; // alors la gravité créerait une collision
 		return false;
 	};
-	
+	this.collisionHorizontale = function(piece) { // retourne vrai si une collision horizontale arrivera au prochain appel de moveToBot
+		var x = (piece.xp/20)|0; // cast from double to integer
+		var y = (piece.yp/20)|0;
+		for (var i=y; i < y+4; i++)
+			for (var j=x; j < x+4; j++)
+				if (piece.matrice[i-y][j-x]) { // s'il y a un cube de la piece ici,
+					if (him.matrice[i][j-1]) // et s'il y a un cube de la map à gauche
+						return -1;
+					if (him.matrice[i][j+1]) // et s'il y a un cube de la map à droite
+						return 1;
+				}
+		return 0;
+	};
 	// pour modifier la matrice lorsqu'une ligne est complète (tombée des lignes au-dessus)
 	this.solve = function() { // renvoie false si game over
 		var complete, gameOver=0;
@@ -62,6 +74,7 @@ function Map() { // Map des pièces déposées sous forme matricielle (1 si cube
 		if (gameOver) return false;
 		else return true;
 	};
+	
 	this.draw = function() {
 		ctx.clearRect(0,0,600,440);
 		for (var i=0; i < 22; i++)
@@ -71,15 +84,66 @@ function Map() { // Map des pièces déposées sous forme matricielle (1 si cube
 }
 
 
-function Piece(xp,yp,x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4,v1,v2,v3,v4) { // class Piece
-  this.xp = xp; // position
-  this.yp = yp;
+function Piece() { // class Piece
+  this.xp = 260; // position milieu
+  this.yp = 0;
   this.matrice = new Array(); // état représenté par matrice (1 présent 0 sinon)
-  this.matrice[0] = [x1,x2,x3,x4]; // colonne y=0
-  this.matrice[1] = [y1,y2,y3,y4];
-  this.matrice[2] = [z1,z2,z3,z4];
-  this.matrice[3] = [v1,v2,v3,v4];
+  this.matrice[0] = [1,0,0,0]; // colonne y=0
+  this.matrice[1] = [1,0,0,0];
+  this.matrice[2] = [1,0,0,0];
+  this.matrice[3] = [1,0,0,0];
   var him = this;
+  
+  this.init = function() {
+	him.xp=260;
+	him.yp=0;
+	
+	var randomnumber=Math.floor(Math.random()*7);
+	switch(randomnumber) {
+		case 0: // T
+			him.matrice[0] = [1,1,1,0];
+			him.matrice[1] = [0,1,0,0];
+			him.matrice[2] = [0,0,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+		case 1: // I
+			him.matrice[0] = [1,0,0,0];
+			him.matrice[1] = [1,0,0,0];
+			him.matrice[2] = [1,0,0,0];
+			him.matrice[3] = [1,0,0,0];
+			break;
+		case 2: // Z
+			him.matrice[0] = [1,1,0,0];
+			him.matrice[1] = [0,1,1,0];
+			him.matrice[2] = [0,0,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+		case 3: // S
+			him.matrice[0] = [0,1,1,0];
+			him.matrice[1] = [1,1,0,0];
+			him.matrice[2] = [0,0,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+		case 4: // L
+			him.matrice[0] = [1,0,0,0];
+			him.matrice[1] = [1,0,0,0];
+			him.matrice[2] = [1,1,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+		case 5: // J
+			him.matrice[0] = [0,1,0,0];
+			him.matrice[1] = [0,1,0,0];
+			him.matrice[2] = [1,1,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+		case 6: // O
+			him.matrice[0] = [1,1,0,0];
+			him.matrice[1] = [1,1,0,0];
+			him.matrice[2] = [0,0,0,0];
+			him.matrice[3] = [0,0,0,0];
+			break;
+	}
+  };
   
   // Routine graphique
   this.clear = function() {
@@ -104,48 +168,52 @@ function Piece(xp,yp,x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4,v1,v2,v3,v4) { // class
 	// Les variables changent d'état en fonction des évènements (voir document.EventListener)
 	if (moveR) {
 		moveR=0;
-		var ok=1;
-		switch (him.xp) { // en fonction de la position de la matrice en dehors du canvas, test si la piece serait affiché hors du canvas et dans ce cas pas de mouvement
-			case 520: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][3]) ok=0;
-				break;
-			case 540: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][2]) ok=0;
-				break;
-			case 560: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][1]) ok=0;
-				break;
-			case 580: ok=0; break;
-			default: ok=1; break;
+		if (map.collisionHorizontale(him)!==1) {
+			var ok=1;
+			switch (him.xp) { // en fonction de la position de la matrice en dehors du canvas, test si la piece serait affiché hors du canvas et dans ce cas pas de mouvement
+				case 520: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][3]) ok=0;
+					break;
+				case 540: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][2]) ok=0;
+					break;
+				case 560: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][1]) ok=0;
+					break;
+				case 580: ok=0; break;
+				default: ok=1; break;
+			}
+			if (ok) him.xp+=20;	// translation Right d'un cube (+20px)
+			ok=1;
 		}
-		if (ok) him.xp+=20;	// translation Right d'un cube (+20px)
-		ok=1;
 	}
 	else if (moveL) { // si l'utilisateur va à gauche et à droite en même temps, ben il ira à droite et ça bugera pas :p
 		moveL=0;
-		var ok=1;
-		switch (him.xp) { // en fonction de la position de la matrice en dehors du canvas, test si la piece serait affiché hors du canvas et dans ce cas pas de mouvement
-			case 0: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][0]) ok=0;
-				break;
-			case -20: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][1]) ok=0;
-				break;
-			case -40: 
-				for (var i=0; (i<4)&&ok; i++)
-					if (him.matrice[i][2]) ok=0;
-				break;
-			case -60: ok=0; break;
-			default: ok=1; break;
+		if (map.collisionHorizontale(him)!==-1) {
+			var ok=1;
+			switch (him.xp) { // en fonction de la position de la matrice en dehors du canvas, test si la piece serait affiché hors du canvas et dans ce cas pas de mouvement
+				case 0: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][0]) ok=0;
+					break;
+				case -20: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][1]) ok=0;
+					break;
+				case -40: 
+					for (var i=0; (i<4)&&ok; i++)
+						if (him.matrice[i][2]) ok=0;
+					break;
+				case -60: ok=0; break;
+				default: ok=1; break;
+			}
+			if (ok) him.xp-=20;	// translation Left d'un cube (-20px)
+			ok=1;
 		}
-		if (ok) him.xp-=20;	// translation Left d'un cube (-20px)
-		ok=1;
-    }
+	}
 	if (turn) {
 		turn=0;
 		if ((him.xp>=0)&&(him.xp<=520)) { // l'utilisateur peut tourner uniquement si la matrice représentant la piece est dans le canvas
@@ -165,7 +233,7 @@ function Piece(xp,yp,x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4,v1,v2,v3,v4) { // class
     him.draw(); // on dessine la pièce modifiée
 	
 	
-    if ((!map.collision(him))) {
+    if ((!map.collisionVerticale(him))) {
 // appel récursif qui s'effectuera dans (period)millisecondes, permet de gérer la vitesse de descente (v=1/period)
 		if (!straightToBot) setTimeout(him.moveToBot,period,period);
 
@@ -178,7 +246,7 @@ function Piece(xp,yp,x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4,v1,v2,v3,v4) { // class
 		//map.display();
 		if (map.solve()) {
 			map.draw();
-			him = new Piece(260,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+			him.init();
 			straightToBot = 0;
 			him.moveToBot(period);
 		}
@@ -210,10 +278,6 @@ document.addEventListener('keydown', function(e){
 // ----------
 var map = new Map();
 map.init();
-var cube = new Piece(200,300,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0); // positionx, positiony, (4*y,) pour x=1..4
-var t2 = new Piece(100,300,0,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0);
-var cube2 = new Piece(0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0);
-var t = new Piece(100,0,0,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0);
-//map.display();
-t.moveToBot(20);
-//map.draw();
+var firstPiece = new Piece();
+firstPiece.init;
+firstPiece.moveToBot(20);

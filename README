@@ -1,0 +1,10 @@
+TeTriS Online
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Project launched by greyna in december, 2011.
+
+This usual tetris is a project made to learn HTML5, JavaScript, API canvas and finally AJAX which need a server installation.
+It is open for any modification, advice or anything, anyway it is made as an exercise.
+
+The game's philosophy is to let the player "make his own game".
+He would be able to create maps, define new pieces, adjust the velocity function of the score then publish it to the server.
+A ranking of each game played on each map would be the last optimization, with an user profile system, and maybe a forum.

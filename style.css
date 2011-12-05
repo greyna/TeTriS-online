@@ -13,6 +13,7 @@ body
 	border-radius: 15px;
 	height:80%
 }
+
 a { color:white; }
 a:hover { color:white; }
 a:focus { color:white; }
@@ -50,12 +51,16 @@ footer
 	text-align: center;
 }
 
-section aside
+section aside h1
 {
-	
+	text-align: center;
 }
 article
 {
 	text-align: center;
+}
+article p
+{
+	text-align: left;
 }
 canvas { border: 1px solid white; }

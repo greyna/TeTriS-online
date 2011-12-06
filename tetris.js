@@ -252,4 +252,5 @@ var map = new Map();
 map.init();
 var firstPiece = new Piece();
 firstPiece.init;
+articlep.innerHTML='SCORE : '+score;
 firstPiece.moveToBot(20);

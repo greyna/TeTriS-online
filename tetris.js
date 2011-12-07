@@ -1,4 +1,24 @@
-﻿function Physics() { // Physics des pièces déposées sous forme matricielle (1 si cube présent, 0 sinon)
+﻿// DEFINITION DES VARIABLES GLOBALES DU TETRIS
+//----------------------------------------------------------------------------
+{ var canvasJeu = document.getElementById('tetris');
+if (canvasJeu.getContext){
+	var ctx = canvasJeu.getContext('2d');
+}
+
+var canvasInfo = document.getElementById('info');
+if (canvasInfo.getContext){
+	var ctxInfo = canvasInfo.getContext('2d');
+}
+
+var articlep = document.querySelector('#game p');
+var straightToBot, moveL, moveR, turn, score;
+var physic = new Physics();
+var piec = new Piece(); }
+
+
+// DEFINITION DES OBJETS DU TETRIS PAR LEUR CONSTRUCTEUR
+//----------------------------------------------------------------------------
+function Physics() { // Physics des pièces déposées sous forme matricielle (1 si cube présent, 0 sinon)
 	this.matrice = new Array(); // 30*22*20pixels dans le canvas
 	var him = this;
 	this.init = function() {
@@ -84,8 +104,7 @@
 	};
 }
 
-
-function Piece() { // class Piece
+function Piece() {
   this.xp = 260; // position milieu
   this.yp = 0;
   this.matrice = new Array(); // état représenté par matrice (1 présent 0 sinon)
@@ -151,7 +170,7 @@ function Piece() { // class Piece
   this.clear = function() {
     for (var i=0; i < 4; i++)
 		for (var j=0; j < 4; j++)
-			if (him.matrice[i][j]) ctx.clearRect((him.xp+j*20)-1,(him.yp+i*20)-1,22,22); //+2 clear pour la bordure
+			if (him.matrice[i][j]) ctx.clearRect((him.xp+j*20)-1,(him.yp+i*20)-1,21,21); //+2 clear pour la bordure
 	ctx.save();
   };
   this.draw = function() {
@@ -182,58 +201,11 @@ function Piece() { // class Piece
 			}
 	}
   };
-  
-  /* Méthode récursive s'arrêtant quand la piece subit une collision selon la physic, on l'enregistre alors dans la physic puis on réinitialise la piece,
-  pour enfin réappeller la méthode sur le même objet afin qu'une nouvelle piece apparaisse au joueur et descende à son tour */
-  this.moveToBot = function (period) {
-	him.clear(); // on efface le dessin de la pièce actuel avant modification
-	
-	//affichage coordonnées pièce en direct (waow lé fort le tutur), décommentez ci-dessous
-	//articlep.innerHTML='x: '+him.xp+'<br/>y: '+him.yp;
-	
-    him.yp+=1; // descente d'un pixel
-	// Les variables changent d'état en fonction des évènements (voir document.EventListener)
-	if (moveR) {
-		moveR=0;
-		if (physic.collisionHorizontale(him)!==1) him.xp+=20;	// translation Right d'un cube (+20px)
-	}
-	else if (moveL) { // si l'utilisateur va à gauche et à droite en même temps, ben il ira à droite et ça bugera pas :p
-		moveL=0;
-		if (physic.collisionHorizontale(him)!==-1) him.xp-=20;	// translation Left d'un cube (-20px)
-	}
-	if (turn) {
-		turn=0;
-		him.turn();
-	}
-	
-	
-    him.draw(); // on dessine la pièce modifiée
-	
-	
-    if ((!physic.collisionVerticale(him))) {
-// appel récursif qui s'effectuera dans (period)millisecondes, permet de gérer la vitesse de descente (v=1/period)
-		if (!straightToBot) setTimeout(him.moveToBot,period,period);
-
-// si l'utilisateur appuie sur 'bas' (straightToBot=1), la pièce doit filer jusqu'en bas :
-// period = 1ms minimum   <=> vitesse maximum donc pour l'augmenter encore il faudra créer une nouvelle fonction
-		else {
-			setTimeout(him.moveToBot,1,period);
-		}
-	}
-	else {
-		physic.add(him);
-		//physic.display();
-		straightToBot = 0;
-		if (physic.solve()) {
-			physic.draw();
-			him.init();
-			him.moveToBot(period);
-		}
-		else articlep.innerHTML='GAME OVER<br/>SCORE : '+score;
-	}
-  };
 }
 
+
+// DEFINITION DES FONCTIONS DU TETRIS
+//----------------------------------------------------------------------------
 function drawCube(x,y,couleur) {
 	switch (couleur) {
 		case 1: ctx.fillStyle = "rgb(255,0,0)"; break;
@@ -272,28 +244,54 @@ function gameInit () {
 	physic.init();
 	articlep.innerHTML='SCORE : '+score;
 	ctxInfo.fillText("Sample String", 10, 50); 
-	firstPiece.init();
-	firstPiece.moveToBot(20);
+	piec.init();
 }
 
+/* Fonction récursive s'arrêtant quand la piece subit une collision selon la physic, on l'enregistre alors dans la physic puis on réinitialise la piece,
+  pour enfin réappeller la fonction sur le même objet afin qu'une nouvelle piece apparaisse au joueur et descende à son tour */
+function gameLoop (period) {
+	piec.clear(); // on efface le dessin de la pièce actuel avant modification	
+    piec.yp+=1; // descente d'un pixel de la pièce
+	// Les variables changent d'état en fonction des évènements (voir document.EventListener)
+	if (moveR) {
+		moveR=0;
+		if (physic.collisionHorizontale(piec)!==1) piec.xp+=20;	// translation Right d'un cube (+20px)
+	}
+	else if (moveL) { // si l'utilisateur va à gauche et à droite en même temps, ben il ira à droite et ça bugera pas :p
+		moveL=0;
+		if (physic.collisionHorizontale(piec)!==-1) piec.xp-=20;	// translation Left d'un cube (-20px)
+	}
+	if (turn) {
+		turn=0;
+		piec.turn();
+	}
+	
+    piec.draw(); // on dessine la pièce modifiée	
+	
+    if ((!physic.collisionVerticale(piec))) {
+// appel récursif qui s'effectuera dans (period)millisecondes, permet de gérer la vitesse de descente (v=1/period)
+		if (!straightToBot) setTimeout(gameLoop,period,period);
+// si l'utilisateur appuie sur 'bas' (straightToBot=1), la pièce doit filer jusqu'en bas :
+// period = 1ms minimum   <=> vitesse maximum donc pour l'augmenter encore il faudra créer une nouvelle fonction
+		else {
+			setTimeout(gameLoop,1,period);
+		}
+	}
+	else {
+		physic.add(piec);
+		//physic.display();
+		straightToBot = 0;
+		if (physic.solve()) {
+			physic.draw();
+			piec.init();
+			gameLoop(period);
+		}
+		else articlep.innerHTML='GAME OVER<br/>SCORE : '+score;
+	}
+  }
 
 
-
-// VARIABLES GLOBALES DU JEU
-var canvasJeu = document.getElementById('tetris');
-if (canvasJeu.getContext){
-	var ctx = canvasJeu.getContext('2d');
-}
-
-var canvasInfo = document.getElementById('info');
-if (canvasInfo.getContext){
-	var ctxInfo = canvasInfo.getContext('2d');
-}
-
-var articlep = document.querySelector('#game p');
-var straightToBot, moveL, moveR, turn, score;
-var physic = new Physics();
-var firstPiece = new Piece();
-
-// ----------
+// PROGRAMME (comprenant le tetris, et plus tard plein d'autres choses)
+//----------------------------------------------------------------------------
 gameInit();
+gameLoop(20);

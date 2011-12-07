@@ -3,7 +3,10 @@ body
 {
 	background-color:black;
 	color:white;
-	width: 70%;
+	width: 80%;
+	min-width: 800px;
+	height:90%;
+	min-height: 800px; 
 	margin:auto;
 	margin-top: 1%;
 	padding: 1%;
@@ -11,7 +14,6 @@ body
 	padding-bottom: 0%;
 	border: white solid 1px;
 	border-radius: 15px;
-	height:80%
 }
 
 a { color:white; }
@@ -55,13 +57,14 @@ section aside h1
 {
 	text-align: center;
 }
-article
-{
-	text-align: center;
-}
-article p
-{
-	text-align: left;
-	float: right;
-}
+
+article p { }
 canvas { border: 1px solid white; }
+article { text-align: center; }
+#game {
+width: 800px;
+height: 500px;
+margin: auto;
+}
+#tetris { float: left; }
+#info { display:none;}

@@ -9,6 +9,7 @@
 				else him.matrice[i][j]=1; // sol ou mur
 			}
 		}
+		him.draw();
 	};
 	this.add = function(piece) { // ajoute une pièce à la physic
 		var x = (piece.xp/20)|0; // cast from double vers integer
@@ -75,9 +76,11 @@
 	
 	this.draw = function() {
 		ctx.clearRect(0,0,600,440);
+		ctx.save();
 		for (var i=0; i < 22; i++)
 			for (var j=1; j < 31; j++)
 				if (him.matrice[i][j]) drawCube((j-1)*20,i*20,him.matrice[i][j]);
+		ctx.restore();
 	};
 }
 
@@ -86,10 +89,10 @@ function Piece() { // class Piece
   this.xp = 260; // position milieu
   this.yp = 0;
   this.matrice = new Array(); // état représenté par matrice (1 présent 0 sinon)
-  this.matrice[0] = [1,0,0,0]; // colonne y=0
-  this.matrice[1] = [1,0,0,0];
-  this.matrice[2] = [1,0,0,0];
-  this.matrice[3] = [1,0,0,0];
+  this.matrice[0] = [0,0,0,0]; // colonne y=0
+  this.matrice[1] = [0,0,0,0];
+  this.matrice[2] = [0,0,0,0];
+  this.matrice[3] = [0,0,0,0];
   var him = this;
   
   this.init = function() {
@@ -97,7 +100,7 @@ function Piece() { // class Piece
 	him.yp=0;
 	
 	var randomNumber=Math.floor(Math.random()*7);
-	var randomColor=Math.floor(Math.random()*3)+1;
+	var randomColor=Math.floor(Math.random()*6)+1;
 	switch(randomNumber) {
 		case 0: // T
 			him.matrice[0] = [randomColor,randomColor,randomColor,0];
@@ -148,12 +151,14 @@ function Piece() { // class Piece
   this.clear = function() {
     for (var i=0; i < 4; i++)
 		for (var j=0; j < 4; j++)
-			if (him.matrice[i][j]) ctx.clearRect(him.xp+j*20,him.yp+i*20,20,20);
+			if (him.matrice[i][j]) ctx.clearRect((him.xp+j*20)-1,(him.yp+i*20)-1,22,22); //+2 clear pour la bordure
+	ctx.save();
   };
   this.draw = function() {
     for (var i=0; i < 4; i++)
 		for (var j=0; j < 4; j++)
 			if (him.matrice[i][j]) drawCube(him.xp+j*20,him.yp+i*20,him.matrice[i][j]);
+	ctx.restore();
   };
   
   this.turn = function() {
@@ -235,61 +240,60 @@ function drawCube(x,y,couleur) {
 		case 2: ctx.fillStyle = "rgb(0,255,0)"; break;
 		case 3: ctx.fillStyle = "rgb(0,0,255)"; break;
 		case 4: ctx.fillStyle = "rgb(255,0,255)"; break;
+		case 5: ctx.fillStyle = "rgb(0,255,255)"; break;
+		case 6: ctx.fillStyle = "rgb(255,255,0)"; break;
 	}
-	ctx.fillRect(x,y,20,20);
+	ctx.fillRect(x,y,19,19);
+	ctx.strokeStyle = '#fff'; // white
+	ctx.lineWidth   = 1;
+	ctx.strokeRect(x,y,19,19);
 }
 
-function Game () {
-	this.ctx = document.getElementById('tetris').getContext('2d');
-	this.ctxInfo = document.getElementById('info').getContext('2d');
-	this.articlep = document.querySelector('#game p');
-	this.straightToBot = 0, this.moveL=0, this.moveR=0, this.turn=0, this.score=0;
+function gameInit () {
+	document.addEventListener('keydown', function(e){
+		switch (e.keyCode) {
+			case 37 : moveL=1; break;
+			case 39 : moveR=1; break;
+			case 40 : straightToBot=1; break;
+			default : break;
+		}
+	}, false);
+	document.addEventListener('keyup', function(e){
+		switch (e.keyCode) {
+			case 38 : turn=1; break;
+			case 40 : straightToBot=0; break;
+			default : break;
+		}
+	}, false);
 	
+	straightToBot = 0; moveL=0; moveR=0; turn=0; score=0;
+	ctx.fillStyle = "rgb(200,0,0)";
+	ctxInfo.fillStyle = "rgb(255,255,255)";
+	physic.init();
+	articlep.innerHTML='SCORE : '+score;
+	ctxInfo.fillText("Sample String", 10, 50); 
+	firstPiece.init();
+	firstPiece.moveToBot(20);
 }
 
 
 
 
-// INIT
+// VARIABLES GLOBALES DU JEU
 var canvasJeu = document.getElementById('tetris');
-var canvasInfo = document.getElementById('info');
-var articlep = document.querySelector('#game p');
-var straightToBot = 0, moveL=0, moveR=0, turn=0, score=0;
 if (canvasJeu.getContext){
 	var ctx = canvasJeu.getContext('2d');
 }
+
+var canvasInfo = document.getElementById('info');
 if (canvasInfo.getContext){
 	var ctxInfo = canvasInfo.getContext('2d');
 }
-ctx.fillStyle = "rgb(200,0,0)";
-ctxInfo.fillStyle = "rgb(255,255,255)";
-document.addEventListener('keydown', function(e){
-	switch (e.keyCode) {
-		//case 38 : turn=; break;
-		case 37 : moveL=1; break;
-		case 39 : moveR=1; break;
-		case 40 : straightToBot=1; break;
-		default : break;
-	}
-}, false);
-document.addEventListener('keyup', function(e){
-	switch (e.keyCode) {
-		case 38 : turn=1; break;
-		//case 37 : moveL=; break;
-		//case 39 : moveR=; break;
-		case 40 : straightToBot=0; break;
-		default : break;
-	}
-}, false);
 
-// ----------
-var newGame = new Game();
-
-// ----------
+var articlep = document.querySelector('#game p');
+var straightToBot, moveL, moveR, turn, score;
 var physic = new Physics();
-physic.init();
 var firstPiece = new Piece();
-firstPiece.init();
-articlep.innerHTML='SCORE : '+score;
-ctxInfo.fillText("Sample String", 10, 50);  
-firstPiece.moveToBot(20);
+
+// ----------
+gameInit();

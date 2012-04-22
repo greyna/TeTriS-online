@@ -1,4 +1,5 @@
-﻿// DEFINITION DES VARIABLES GLOBALES DU TETRIS
+﻿// CANVAS UTILISÉ COMME MOTEUR GRAPHIQUE 2D
+// DEFINITION DES VARIABLES GLOBALES DU TETRIS
 //----------------------------------------------------------------------------
 { var canvasJeu = document.getElementById('tetris');
 if (canvasJeu.getContext){
@@ -14,6 +15,7 @@ var articlep = document.querySelector('#game p');
 var straightToBot, moveL, moveR, turn, score;
 var physic = new Physics();
 var piec = new Piece(); }
+
 
 
 // DEFINITION DES OBJETS DU TETRIS PAR LEUR CONSTRUCTEUR
@@ -87,9 +89,8 @@ function Physics() { // Physics des pièces déposées sous forme matricielle (1
 		}
 		
 		//game over s'il existe des cubes dans l'emplacement d'arrivée d'une nouvelle pièce
-		for (var i=0; (i<4)&&(!gameOver); i++)
-			for (var j=12; (j<16)&&(!gameOver); j++)
-				if (him.matrice[i][j]) gameOver=1;
+			for (var j=1; (j<31)&&(!gameOver); j++)
+				if (him.matrice[0][j]) gameOver=1;
 		if (gameOver) return false;
 		else return true;
 	};
@@ -204,6 +205,7 @@ function Piece() {
 }
 
 
+
 // DEFINITION DES FONCTIONS DU TETRIS
 //----------------------------------------------------------------------------
 function drawCube(x,y,couleur) {
@@ -290,6 +292,7 @@ function gameLoop (period) {
 	}
   }
 
+  
 
 // PROGRAMME (comprenant le tetris, et plus tard plein d'autres choses)
 //----------------------------------------------------------------------------

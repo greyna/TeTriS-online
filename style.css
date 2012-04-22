@@ -1,4 +1,5 @@
 ﻿html { background-color:gray; }
+
 body
 {
 	background-color:black;
@@ -59,7 +60,7 @@ section aside h1
 }
 
 canvas { border: 1px solid white; }
-article { text-align: center; }
+article { text-align: center;  }
 #game {
 width: 800px;
 height: 500px;
